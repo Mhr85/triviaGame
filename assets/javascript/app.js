@@ -1,105 +1,144 @@
-// GLOBAL VAR
-var correctAnswers
-var inCorrectAnswers
-var unAnswered
-var intervalId
+
+var questions = [{
+    "question": "What is the largest non-continental island in the world?",
+    "option1": "Greenland",
+    "option2": "New Guinea",
+    "option3": "Borneo",
+    "option4": "Madagascar",
+    "answer": "1",
+  },
+  {
+    "question": "What is the name of the capital of Turkey?",
+    "option1": "Indonesia",
+    "option2": "Malaysia",
+    "option3": "Singapore",
+    "option4": "Thailand",
+    "answer": "2",
+  },
+  {
+    "question": "Which of these is NOT an island that is part of the Philippines?",
+    "option1": "Mindanao",
+    "option2": "Luzon",
+    "option3": "Java",
+    "option4": "Palawan",
+    "answer": "3",
+  },
+  {
+    "question": "What event led to Liechenstein adding a crown to its flag?",
+    "option1": "Coronation of Prince Johann I Joseph in 1805",
+    "option2": "Charles VI&#039;s decree in 1719",
+    "option3": "Signing of the 1862 Constitution of Liechtenstein",
+    "option4": "The 1936 Olympics",
+    "answer": "4",
+  }
+];
+
+var currentQuestion = 0;
+var correctAnswers = 0;
+var inCorrectAnswers = 0;
+var unAnswered = 0;
+var totalQuestions = questions.length;
+var intervalId;
 var clockRunning = false;
 var time = 0;
+var input = ["1", "2", "3", "4"];
+var value = ["1", "2", "3", "4"];
+var label = ["1", "2", "3", "4"];
+var spanId = ["opt1", "opt2", "opt3", "opt4"];
+
 // STARTING DIV
-// window.onload = function(){
-var divOne = $("<div></div>");
-divOne.addClass("container bg-warning container-style");
-divOne.attr('id', 'starting-div');
-$("#main-container").append(divOne);
+$("<div>").addClass("container bg-warning container-style").attr('id', 'starting-div').html("<h1>Trivia Game</h1>").appendTo("#main-container");
+$("<button>").text("Start").addClass("start_btn btn btn-dark btn-block p-4").appendTo("#starting-div");
 
-var divTwo = $("<div></div>");
-divTwo.addClass("container bg-warning container-style");
-divTwo.attr('id', 'game-div');
-$("#main-container").append(divTwo);
-$("#game-div").html("<h1>Trivia Game</h1> <h2>00:00</h2> <p class='q-1'></p> <br> <p class='q-2'></p>");
+$("<div>").addClass("container bg-warning container-style").attr('id', 'game-div').css('display', 'none').appendTo("#main-container");
+$("#game-div").html("<h1>Trivia Game</h1> <h2>00:00</h2>");
 $("#game-div h2").attr('id', 'display');
+$("<div>").addClass("question").attr('id', 'question').appendTo("#game-div");
+
+$.each(input, function(i, int){
+var inputFor = $("<input type='radio' name='option'>").addClass("btn").val(value[i]);
+$("<label>").addClass("option btn btn-dark p-2 m-2").html(inputFor).attr('id', spanId[i]).appendTo("#game-div");
+});
+
+$("<div>").addClass("container bg-warning container-style result").attr('id', 'result-div').css('display', 'none').appendTo("#main-container");
+
+$(document).ready(function(){
+  // $('.start_ btn').on('click', function(){}); p-2
+  $('#main-container').on("click",".start_btn", function(){
+    $("#starting-div").css('display', 'none');
+    $("#game-div").css('display', '');
+    var currentQuestion = loadQuestion(0);
+  });
+
+  function loadQuestion (questionIndex){
+    startTimer();
+    var q = questions[questionIndex];
+    $('#main-container').find('.question').text((questionIndex + 1) + ". " + q.question);
+    $("#opt1").append(q.option1);
+    $("#opt2").append(q.option2);
+    $("#opt3").append(q.option3);
+    $("#opt4").append(q.option4);
+  };
+
+  $("input[type='radio']").on("click", function loadNextQuestion(){
+      var radioValue = $("input[name='option']:checked").val();
+
+    if(questions[currentQuestion].answer == radioValue){
+      correctAnswers += 1;
+      //alert("Correct Answers: " + correctAnswers);
+    } else {
+      inCorrectAnswers += 1;
+      //alert("Incorrect Answers: " + inCorrectAnswers);
+    }
+
+    currentQuestion++;
+    if(currentQuestion == totalQuestions){
+      $("#game-div").css('display', 'none');
+      $("#result-div").css('display', '');
+      $("#result-div").append("Correct Answers: " + correctAnswers + " ");
+      $("#result-div").append("Incorrect Answers: " + inCorrectAnswers);
+      return;
+    }
+    loadQuestion(currentQuestion);
+  });
 
 
 
-var divThree = $("<div></div>");
-divThree.addClass("container bg-warning container-style");
-divThree.attr('id', 'result-div');
-$("#main-container").append(divThree);
-$("#result-div").html("<h1>Trivia Game</h1>");
-
-var startButton = $("<button></button>");
-startButton.text("Start");
-startButton.addClass("btn btn-dark btn-block p-4");
-$("#starting-div").html("<h1>Trivia Game</h1>");
-$("#starting-div").append(startButton);
-$(".btn").on("click", startTimer);
-// $("#starting-div").hide();
-// startTimer();
-// };
-
-
-// function startTheGame(){
   function startTimer(){
     if(!clockRunning){
       intervalId = setInterval(countTime, 1000);
       clockRunning = true;
     }
-  }
-
+    function reset(){
+      time = 0;
+    }
   function countTime(){
-    time++;
-    var newTime = timeConverter(time);
-    // $("#starting-div h1").text(newTime);
-    // $("#game-div").text("<h1>Trivia Game</h1>");
-    $("#display").text(newTime);
+      time++;
+      var newTime = timeConverter(time);
+      $("#display").text(newTime);
+       if (time === 05){
+          reset();
+        }
+
+    }
+    function stop (){
+      clearInterval(intervalId);
+    }
+    function timeConverter(t){
+      var minutes = Math.floor(t / 60);
+      var seconds = t - (minutes * 60);
+
+      if(seconds < 10){
+        seconds = "0" + seconds;
+      }
+      if(minutes === 0){
+        minutes = "00";
+      }
+      else if(minutes < 10){
+        minutes = "0" + minutes;
+      }
+      return minutes + ":" + seconds;
+    }
   }
 
-  function timeConverter(t){
-    var minutes = Math.floor(t / 60);
-    var seconds = t - (minutes * 60);
-
-    if(seconds < 10){
-      seconds = "0" + seconds;
-    }
-    if(minutes === 0){
-      minutes = "00";
-    }
-    else if(minutes < 10){
-      minutes = "0" + minutes;
-    }
-    return minutes + ":" + seconds;
-  }
-// }
-
-var triviaQuestions = {
-  questionOne: "You should eat fruits and vegetables because",
-  optionsOne: [
-    "They contain fiber, which helps keep your digestive system healthy",
-    "They give you energy",
-    "They contain vitamins and minerals that help you stay healthy",
-    "All of the above",
-  ],
-  correctAnswer: "All of the above",
-
-  questionTwo: "More than 250 different kinds of fruit and vegetables are grown in California. However, a few fruits and vegetables require a more tropical environment to grow. Which fruit is not grown very often in California?",
-  optionsTwo: [
-    "banana",
-    "plum",
-    "grape",
-    "strawberry",
-  ],
-
-}
-
-$(".q-1").append(triviaQuestions.questionOne);
-for(var i = 0; i < triviaQuestions.optionsOne.length; i++){
-  $('<input type="radio" name="radioButton" class="radio-1"/>').appendTo("#game-div");
-  $("input:radio").text(triviaQuestions.optionsOne[0]);
-}
-
-
-$(".q-2").append(triviaQuestions.questionTwo);
-for(var i = 0; i < triviaQuestions.optionsTwo.length; i++){
-  $('<input type="radio" name="radioButton" class="radio-1"/>').appendTo("#game-div");
-  $("input:radio").text(triviaQuestions.optionsOne[0]);
-}
+});
